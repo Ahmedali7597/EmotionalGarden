@@ -142,4 +142,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   correctShape: Circle
+  correctColor: 
   isFilled: 0
+  sr: {fileID: 0}

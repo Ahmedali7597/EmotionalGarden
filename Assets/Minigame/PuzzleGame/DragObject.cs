@@ -6,53 +6,31 @@ public class DragObjectMobile : MonoBehaviour, IPointerDownHandler, IDragHandler
     private Vector3 startPos;
     private Camera cam;
     private SpriteRenderer sr;
+    private Rigidbody2D rb;
 
     public string shapeType;
     public string colorType;
-
     public float checkRadius = 0.5f;
 
     private string[] shapes = new string[] { "Circle", "Square", "Triangle" };
-    private Color[] colors = new Color[] { Color.red, Color.blue, Color.green };
-    private string[] colorNames = new string[] { "Red", "Blue", "Green" };
+    
+    // 💡 Matched the count and order to exactly 9 to prevent OutOfBounds errors!
+    private Color[] colors = new Color[] { Color.red, Color.blue, Color.green, Color.yellow, Color.magenta, Color.cyan, Color.gray, Color.white, Color.black };
+    private string[] colorNames = new string[] { "Red", "Blue", "Green", "Yellow", "Magenta", "Cyan", "Gray", "White", "Black" };
 
-    void Start()
+    void Awake()
     {
         cam = Camera.main;
-        startPos = transform.position;
         sr = GetComponent<SpriteRenderer>();
-
-        // Only randomize if not assigned yet
-        if (string.IsNullOrEmpty(shapeType) || string.IsNullOrEmpty(colorType))
-        {
-            RandomizeShapeAndColor();
-        }
-        else
-        {
-            ApplyColor();
-        }
+        rb = GetComponent<Rigidbody2D>(); 
+        startPos = transform.position;
     }
 
-    // New public method for ShapeManager to call
-    public void RandomizeShapeAndColor()
-    {
-        int shapeIndex = Random.Range(0, shapes.Length);
-        shapeType = shapes[shapeIndex];
-
-        int colorIndex = Random.Range(0, colors.Length);
-        colorType = colorNames[colorIndex];
-        if (sr != null) sr.color = colors[colorIndex];
+    public void OnPointerDown(PointerEventData eventData) 
+    { 
+        // Switch to Kinematic the moment it's grabbed to ignore gravity
+        if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic; 
     }
-
-    private void ApplyColor()
-    {
-        if (sr == null) sr = GetComponent<SpriteRenderer>();
-        if (colorType == "Red") sr.color = Color.red;
-        else if (colorType == "Blue") sr.color = Color.blue;
-        else if (colorType == "Green") sr.color = Color.green;
-    }
-
-    public void OnPointerDown(PointerEventData eventData) { }
 
     public void OnDrag(PointerEventData eventData)
     {
@@ -71,12 +49,43 @@ public class DragObjectMobile : MonoBehaviour, IPointerDownHandler, IDragHandler
                 if (socket.correctShape == shapeType && socket.correctColor == colorType)
                 {
                     transform.position = socket.transform.position;
+                    transform.rotation = Quaternion.identity;
                     socket.isFilled = true;
-                    GameManager.instance.CheckWin();
-                    return;
+                     GameManager.instance.CheckWin();
+
+                    // Disable physics since it snapped into the correct socket (Keep Kinematic)
+                    if (rb != null) 
+                    {
+                        rb.bodyType = RigidbodyType2D.Kinematic; 
+                        rb.linearVelocity = Vector2.zero;
+                    }
+                    
+                    return; // Exit the function
                 }
             }
         }
-        transform.position = startPos;
+        
+        // Turn gravity back on so it falls to the floor if incorrect (Dynamic)
+        if (rb != null) 
+        {
+            rb.bodyType = RigidbodyType2D.Dynamic; 
+            rb.linearVelocity = Vector2.zero; 
+        }
+    }
+    
+    public void SetShapeAndColor(string shape, string color)
+    {
+        shapeType = shape;
+        colorType = color;
+
+        // Apply the corresponding color from the arrays
+        for (int i = 0; i < colorNames.Length; i++)
+        {
+            if (colorNames[i] == color)
+            {
+                sr.color = colors[i];
+                break;
+            }
+        }
     }
 }

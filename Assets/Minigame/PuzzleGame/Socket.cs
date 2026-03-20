@@ -2,25 +2,21 @@ using UnityEngine;
 
 public class Socket : MonoBehaviour
 {
-    public string correctShape;
-    public string correctColor;
+    public string correctShape; // Assigned in the Inspector
+    public string correctColor; // Now dynamically set by ShapeManager
     public bool isFilled = false;
-
     public SpriteRenderer sr;
 
-    // Possible shapes and colors
-    private string[] shapes = new string[] { "Circle", "Square", "Triangle" };
-    private Color[] colors = new Color[] { Color.red, Color.blue, Color.green };
-    private string[] colorNames = new string[] { "Red", "Blue", "Green" };
-
-    public void RandomizeSocket()
+    void Awake()
     {
-        int shapeIndex = Random.Range(0, shapes.Length);
-        correctShape = shapes[shapeIndex];
+        sr = GetComponent<SpriteRenderer>();
+    }
 
-        int colorIndex = Random.Range(0, colors.Length);
-        correctColor = colorNames[colorIndex];
-        if (sr != null)
-            sr.color = colors[colorIndex];
+    // 👈 ShapeManager will pick a unique color and pass it to this function!
+    public void SetColor(string colorName, Color actualColor)
+    {
+        correctColor = colorName;
+        if(sr == null) sr = GetComponent<SpriteRenderer>();
+        sr.color = actualColor;
     }
 }
