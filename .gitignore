@@ -29,3 +29,11 @@ Thumbs.db
 
 # JetBrains
 .idea/
+
+# Coplay AI plugin (git package — do not commit)
+Packages/Coplay/
+Packages/Coplay.meta
+
+# MCP Unity (git package — do not commit)
+Packages/com.gamelovers.mcp-unity/
+Packages/com.gamelovers.mcp-unity.meta

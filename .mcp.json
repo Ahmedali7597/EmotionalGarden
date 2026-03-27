@@ -1,0 +1,10 @@
+﻿{
+  "mcpServers": {
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Ahmed Ali\\Downloads\\Personal\\MCP\\unity_mcp\\mcp-unity-repo\\Server~\\build\\index.js"
+      ]
+    }
+  }
+}
