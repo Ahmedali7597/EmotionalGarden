@@ -1,30 +1,83 @@
 using UnityEngine;
+using UnityEngine.SceneManagement; // Required for scene switching (Restart/Next Level)
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance;
+    // Singleton Pattern so DragObject can easily find this.
+    public static GameManager instance; 
 
-    public Socket[] sockets;
-    public Transform door; // assign door object here
+    // IMPORTANT! Assign your Socket GameObjects here in the Inspector!
+    public Socket[] sockets; 
+    public GameObject winUI; // Assign your Win UI Panel (e.g., "Well Done!")
 
+    // Initialize the static instance.
     void Awake()
     {
-        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            // In case a duplicate GameManager exists in a new scene.
+            Destroy(gameObject); 
+        }
     }
 
-    public void CheckWin()
+    void Start()
     {
-        foreach (Socket s in sockets)
+        // Hide Win UI at the start
+        if (winUI != null) winUI.SetActive(false); 
+    }
+
+    // This method is called by DragObject when a shape is dropped.
+    public void CheckWin() 
+    {
+        // Safety check in case sockets are not assigned.
+        if (sockets == null || sockets.Length == 0)
         {
-            if (!s.isFilled)
-                return;
+            Debug.LogError("Error: No sockets assigned to the GameManager in the Inspector!");
+            return; 
         }
 
-        OpenDoor();
+        bool allCorrect = true;
+
+        // Loop through all assigned sockets
+        foreach (Socket socket in sockets)
+        {
+            // Extra safety: Check if a slot in the array is null.
+            if (socket == null)
+            {
+                Debug.LogError("Error: Found a null entry in the GameManager Sockets array. Please correct.");
+                allCorrect = false; 
+                break;
+            }
+
+            // Check if THIS specific socket has been solved.
+            if (!socket.isCorrect) 
+            {
+                allCorrect = false;
+                break; // If even ONE is incorrect, we stop checking.
+            }
+        }
+
+        // If all sockets are correct, the player wins!
+        if (allCorrect)
+        {
+            Debug.Log("Puzzle Solved: Well Done!");
+            if (winUI != null) winUI.SetActive(true); // Show the Win UI
+        }
     }
 
-    void OpenDoor()
+    // UI Button Function: Restart Current Level
+    public void RestartLevel()
     {
-        Debug.Log("Door opened!");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // UI Button Function: Next Level (by index)
+    public void NextLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }

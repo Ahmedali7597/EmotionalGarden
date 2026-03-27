@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections.Generic; // 👈 Required to use List (pool) functionality!
+using System.Collections.Generic;
 
 public class ShapeManager : MonoBehaviour
 {
@@ -7,85 +7,103 @@ public class ShapeManager : MonoBehaviour
     public GameObject[] shapePrefabs;
     public int shapesPerSocket = 3;
 
-    private string[] shapeNames = { "Circle", "Square", "Triangle" };
-    
-    // Using the same 9-color set used in DragObjectMobile!
     private Color[] colors = new Color[] { Color.red, Color.blue, Color.green, Color.yellow, Color.magenta, Color.cyan, Color.gray, Color.white, Color.black };
     private string[] colorNames = new string[] { "Red", "Blue", "Green", "Yellow", "Magenta", "Cyan", "Gray", "White", "Black" };
 
     void Start()
     {
-        // 1️⃣ Create a List (pool) to hold color indices (0~8).
-        List<int> availableColorPool = new List<int>();
-        for (int i = 0; i < colorNames.Length; i++)
+        if (sockets == null || sockets.Length != 3) return;
+
+        List<int> allColorIndices = new List<int>();
+        for (int i = 0; i < colorNames.Length; i++) { allColorIndices.Add(i); }
+
+        int[] correctColorIndicesForSockets = new int[3];
+        List<int> tempColorPool = new List<int>(allColorIndices);
+
+        for (int i = 0; i < sockets.Length; i++)
         {
-            availableColorPool.Add(i);
+            if (sockets[i] == null) continue;
+
+            int pickedIdx = GetUniqueRandomIndex(tempColorPool);
+            correctColorIndicesForSockets[i] = pickedIdx;
+
+            // Get the 'real shape' written on the socket.
+            string shapeName = sockets[i].myShapeName; 
+            
+            // Set the correct color for the socket.
+            sockets[i].SetSolution(colorNames[pickedIdx], colors[pickedIdx]);
+        }
+        
+        List<int> fakeColorPool = new List<int>(allColorIndices);
+        List<int> correctIndicesList = new List<int>(correctColorIndicesForSockets);
+        correctIndicesList.Sort(); 
+        for (int i = correctIndicesList.Count - 1; i >= 0; i--)
+        {
+            fakeColorPool.Remove(correctIndicesList[i]);
         }
 
-        foreach (Socket socket in sockets)
+        for (int i = 0; i < sockets.Length; i++)
         {
-            // 2️⃣ Pick a unique color for the socket and remove it from the pool!
-            int socketColorIdx = GetUniqueRandomIndex(availableColorPool);
-            socket.SetColor(colorNames[socketColorIdx], colors[socketColorIdx]);
+            // Create shapes based on the shape assigned to the socket.
+            string currentShapeName = sockets[i].myShapeName;
 
-            // 3️⃣ Create 1 correct shape (same color as the socket)
-            CreateShape(socket.correctShape, colorNames[socketColorIdx]);
+            // 1. Always create exactly 1 'correct shape' that perfectly matches the socket.
+            int correctColIdx = correctColorIndicesForSockets[i];
+            CreateShape(currentShapeName, colorNames[correctColIdx], colors[correctColIdx]);
 
-            // 4️⃣ Create incorrect shapes (for the remaining amount)
-            for (int i = 0; i < shapesPerSocket - 1; i++)
+            // 2. Create the remaining fake shapes.
+            for (int j = 0; j < shapesPerSocket - 1; j++)
             {
-                string randomShape = shapeNames[Random.Range(0, shapeNames.Length)];
-                
-                // Pick unique colors for incorrect shapes from the pool too!
-                int randomColorIdx = GetUniqueRandomIndex(availableColorPool);
-                CreateShape(randomShape, colorNames[randomColorIdx]);
+                if (fakeColorPool.Count == 0) break;
+                int randomFakePos = Random.Range(0, fakeColorPool.Count);
+                int fakeColorIdx = fakeColorPool[randomFakePos];
+
+                CreateShape(currentShapeName, colorNames[fakeColorIdx], colors[fakeColorIdx]);
             }
         }
     }
 
-    // 🌟 The core logic! Function to pick and remove without duplicates
     int GetUniqueRandomIndex(List<int> pool)
     {
-        // If the pool is empty (e.g., more shapes than available colors), default to Red (index 0) to prevent out-of-bounds errors.
-        if (pool.Count == 0) return 0; 
-
-        // Pick a random index from the remaining pool.
+        if (pool.Count == 0) return 0;
         int randomPos = Random.Range(0, pool.Count);
         int pickedIndex = pool[randomPos];
-        
-        // 👈 Remove the picked color from the pool! (Core logic to prevent duplicates)
         pool.RemoveAt(randomPos); 
-        
         return pickedIndex;
     }
 
-    void CreateShape(string shape, string color)
+    void CreateShape(string shape, string colorName, Color colorValue)
     {
         GameObject prefab = GetPrefabByShape(shape);
+        if (prefab == null) return; 
 
-        float height = Camera.main.orthographicSize;
-        float width = height * Camera.main.aspect;
-        float padding = 0.5f; 
+        float cameraHeight = Camera.main.orthographicSize;
+        float cameraWidth = cameraHeight * Camera.main.aspect;
+        float padding = 1.0f; 
 
-        // 👇 Narrow down the random Y-axis range to the middle of the screen!
-        // For example, setting it between -1.5f and 1.5f spawns them near the center.
         Vector2 pos = new Vector2(
-            Random.Range(-width + padding, width - padding), // X-axis (left/right) remains wide
-            Random.Range(-1.5f, 1.5f)                        // Y-axis (up/down) constrained to the middle!
+            Random.Range(-cameraWidth + padding, cameraWidth - padding), 
+            Random.Range(-cameraHeight * 0.5f, cameraHeight - padding * 2)
         );
 
         GameObject obj = Instantiate(prefab, pos, Quaternion.identity);
+        obj.name = $"{colorName}_{shape}"; 
 
-        DragObjectMobile drag = obj.GetComponent<DragObjectMobile>();
-        drag.SetShapeAndColor(shape, color);
+        DragObject drag = obj.GetComponent<DragObject>();
+        if (drag != null)
+        {
+            drag.SetShapeAndColor(shape, colorName, colorValue);
+        }
     }
 
     GameObject GetPrefabByShape(string shape)
     {
-        if (shape == "Circle") return shapePrefabs[0];
-        if (shape == "Square") return shapePrefabs[1];
-        if (shape == "Triangle") return shapePrefabs[2];
-
-        return shapePrefabs[0]; 
+        if (shape == "Rune1") return shapePrefabs[0]; // First shape prefab
+        if (shape == "Rune2") return shapePrefabs[1]; // Second shape prefab
+        if (shape == "Rune3") return shapePrefabs[2]; // Third shape prefab
+        
+        // Warning message in case of a typo in the name
+        Debug.LogError($"Error: Shape name is invalid: '{shape}'. Please make sure it is Rune1, Rune2, or Rune3.");
+        return shapePrefabs[0];
     }
 }

@@ -1,91 +1,140 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.EventSystems; // Required for drag & drop functionality
 
-public class DragObjectMobile : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+public class DragObject : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
-    private Vector3 startPos;
-    private Camera cam;
-    private SpriteRenderer sr;
-    private Rigidbody2D rb;
+    // Properties of the current shape (Set by ShapeManager)
+    public string currentShape; 
+    public string currentColor;
 
-    public string shapeType;
-    public string colorType;
-    public float checkRadius = 0.5f;
+    private Vector2 offset; 
+    private Camera mainCamera;
+    private bool isDragging = false;
+    private Socket currentSocket; // The socket it is currently placed in (null if none)
 
-    private string[] shapes = new string[] { "Circle", "Square", "Triangle" };
-    
-    // 💡 Matched the count and order to exactly 9 to prevent OutOfBounds errors!
-    private Color[] colors = new Color[] { Color.red, Color.blue, Color.green, Color.yellow, Color.magenta, Color.cyan, Color.gray, Color.white, Color.black };
-    private string[] colorNames = new string[] { "Red", "Blue", "Green", "Yellow", "Magenta", "Cyan", "Gray", "White", "Black" };
+    private Rigidbody2D rb; // Reference to the Physics component
 
     void Awake()
     {
-        cam = Camera.main;
-        sr = GetComponent<SpriteRenderer>();
-        rb = GetComponent<Rigidbody2D>(); 
-        startPos = transform.position;
+        mainCamera = Camera.main;
+        rb = GetComponent<Rigidbody2D>(); // Get Rigidbody2D on Awake
     }
 
-    public void OnPointerDown(PointerEventData eventData) 
-    { 
-        // Switch to Kinematic the moment it's grabbed to ignore gravity
-        if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic; 
+    // Function to set the data and color of the shape (Optimized for 2D SpriteRenderer)
+    public void SetShapeAndColor(string shape, string colorName, Color colorValue)
+    {
+        currentShape = shape;
+        currentColor = colorName;
+        
+        // Find SpriteRenderers in children and change the color directly
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+        
+        if (renderers != null && renderers.Length > 0)
+        {
+            foreach (SpriteRenderer sr in renderers)
+            {
+                // Set the color of the sprite (The most reliable way in 2D)
+                sr.color = colorValue; 
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Warning: DragObject [{gameObject.name}] has no SpriteRenderer! Please check the prefab.");
+        }
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        // Prevent dragging if the shape is already correctly placed in a socket
+        if (currentSocket != null && currentSocket.isCorrect) return;
+
+        Vector2 mousePos = mainCamera.ScreenToWorldPoint(eventData.position);
+        offset = (Vector2)transform.position - mousePos;
+        isDragging = true;
+
+        // Pause physics when grabbed
+        if(rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        Vector3 touchPos = cam.ScreenToWorldPoint(eventData.position);
-        transform.position = new Vector3(touchPos.x, touchPos.y, 0);
+        if (isDragging)
+        {
+            Vector2 mousePos = mainCamera.ScreenToWorldPoint(eventData.position);
+            transform.position = mousePos + offset;
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, checkRadius);
-        foreach (Collider2D hit in hits)
+        if (!isDragging) return;
+        isDragging = false;
+
+        // Snapping Logic
+        Socket[] allSockets = GameObject.FindObjectsByType<Socket>(FindObjectsSortMode.None);
+        float snapDistance = 1.0f; // Range to detect snapping
+        Socket nearestSocket = null;
+        float minDistance = float.MaxValue;
+
+        // Search for nearby sockets
+        foreach (Socket socket in allSockets)
         {
-            Socket socket = hit.GetComponent<Socket>();
-            if (socket != null && !socket.isFilled)
+            float dist = Vector2.Distance(transform.position, socket.transform.position);
+            if (dist < snapDistance && dist < minDistance)
             {
-                if (socket.correctShape == shapeType && socket.correctColor == colorType)
+                minDistance = dist;
+                nearestSocket = socket;
+            }
+        }
+
+        // 1. When dropped near a socket
+        if (nearestSocket != null)
+        {
+            // Ask the socket to verify if this is the correct match
+            bool matched = nearestSocket.CheckPlacedObject(this); 
+
+            if (matched)
+            {
+                // KEY FIX for Physics & Animation: Snap perfectly to the socket
+                currentSocket = nearestSocket;
+                
+                // 1. Align position perfectly
+                transform.position = currentSocket.transform.position; 
+                
+                // 2. Reset rotation (Ensures animations play in the correct orientation)
+                transform.rotation = Quaternion.identity; 
+
+                // 3. Lock the Physics Engine completely
+                if (rb != null)
                 {
-                    transform.position = socket.transform.position;
-                    transform.rotation = Quaternion.identity;
-                    socket.isFilled = true;
-                     GameManager.instance.CheckWin();
-
-                    // Disable physics since it snapped into the correct socket (Keep Kinematic)
-                    if (rb != null) 
-                    {
-                        rb.bodyType = RigidbodyType2D.Kinematic; 
-                        rb.linearVelocity = Vector2.zero;
-                    }
-                    
-                    return; // Exit the function
+                    rb.linearVelocity = Vector2.zero; // Set velocity to 0
+                    rb.angularVelocity = 0f;      // Set angular velocity to 0
+                    rb.isKinematic = true;        // Change to Kinematic mode (Stops gravity/collisions)
                 }
-            }
-        }
-        
-        // Turn gravity back on so it falls to the floor if incorrect (Dynamic)
-        if (rb != null) 
-        {
-            rb.bodyType = RigidbodyType2D.Dynamic; 
-            rb.linearVelocity = Vector2.zero; 
-        }
-    }
-    
-    public void SetShapeAndColor(string shape, string color)
-    {
-        shapeType = shape;
-        colorType = color;
 
-        // Apply the corresponding color from the arrays
-        for (int i = 0; i < colorNames.Length; i++)
-        {
-            if (colorNames[i] == color)
-            {
-                sr.color = colors[i];
-                break;
+                // Disable the collider (Prevent further movement)
+                Collider2D col = GetComponent<Collider2D>();
+                if(col != null) col.enabled = false; 
+
+                Debug.Log($"[{currentShape}] snapped to Socket with rotation reset.");
+
+                // Trigger Win Check in GameManager
+                if (GameManager.instance != null) { GameManager.instance.CheckWin(); }
             }
+            else
+            {
+                // If incorrect: Object stays where it is or falls (Gravity takes over if rb.isKinematic is false)
+                currentSocket = null;
+            }
+        }
+        else
+        {
+            // Not near any socket
+            currentSocket = null;
         }
     }
 }
