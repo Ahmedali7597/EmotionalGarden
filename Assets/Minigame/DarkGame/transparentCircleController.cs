@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem; // New Input System
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -23,6 +23,14 @@ public class TransparentCircleController2D : MonoBehaviour
 
     void Update()
     {
+        // Ignore input while Settings screen is open
+        if (SettingsUI.isOpen) 
+        {
+            uv = new Vector2(-1f, -1f);
+            mat.SetVector("_Center", new Vector4(uv.x, uv.y, 0, 0));
+            return;
+        }
+
         Vector2 screenPos = Vector2.zero;
         bool hasInput = false;
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class RuneGameManager : MonoBehaviour
 {
@@ -15,6 +15,9 @@ public class RuneGameManager : MonoBehaviour
             // All runes finished → remove black screen
             blackScreenReveal.StartReveal();
             Debug.Log("Game Completed!");
+            
+            // Show EndGame screen (Success!)
+            EndGameUI.Show(true);
         }
     }
 
