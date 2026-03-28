@@ -331,7 +331,35 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 474310462835745712, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
       propertyPath: m_Name
-      value: pauseBtn
+      value: SettingsBtn
+      objectReference: {fileID: 0}
+    - target: {fileID: 5701870525814307263, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -4852613496269684587, guid: 0586938b8ba1ea64c91691001ac8c3be, type: 3}
+    - target: {fileID: 5701870525814307263, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5701870525814307263, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5701870525814307263, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5701870525814307263, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8460122445514077233, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8460122445514077233, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8460122445514077233, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -343,7 +371,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8460122445514077233, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 8460122445514077233, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -373,11 +401,32 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9196638099968773409, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 474310462835745712, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1303140141}
   m_SourcePrefab: {fileID: 100100000, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+--- !u!1 &1303140140 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 474310462835745712, guid: 870c28b0d1026aa41bc53c94ac58a66c, type: 3}
+  m_PrefabInstance: {fileID: 1303140139}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1303140141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303140140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69c79f14e7c108c43b3abbc33da0788f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SettingsButton
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

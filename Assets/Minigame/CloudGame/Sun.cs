@@ -16,6 +16,9 @@ public class Sun : MonoBehaviour
 
     void Update()
     {
+        // Ignore input while Settings screen is open
+        if (SettingsUI.isOpen) return;
+
         if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
         {
             Vector2 screenPosition = Pointer.current.position.ReadValue();
@@ -31,6 +34,9 @@ public class Sun : MonoBehaviour
                     
                     Instantiate(complete, Vector3.zero, Quaternion.identity);
                     Time.timeScale = 0f; // Freeze time
+                    
+                    // Show EndGame screen (Success - sun found!)
+                    EndGameUI.Show(true);
                     
                     Destroy(gameObject); 
                 }

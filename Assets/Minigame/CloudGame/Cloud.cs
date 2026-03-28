@@ -26,6 +26,9 @@ public class Cloud : MonoBehaviour
 
     void Update()
     {
+        // Ignore input while Settings screen is open
+        if (SettingsUI.isOpen) return;
+
         if (Pointer.current == null) return;
 
         Vector2 screenPosition = Pointer.current.position.ReadValue();
