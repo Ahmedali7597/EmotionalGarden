@@ -28,6 +28,15 @@ public class GameManager : MonoBehaviour
     {
         // Hide Win UI at the start
         if (winUI != null) winUI.SetActive(false); 
+        
+        // Auto-find all Socket instances in the scene at runtime.
+        // This ensures we check the actual scene objects, not prefab references.
+        Socket[] sceneSockets = FindObjectsByType<Socket>(FindObjectsSortMode.None);
+        if (sceneSockets != null && sceneSockets.Length > 0)
+        {
+            sockets = sceneSockets;
+            Debug.Log($"GameManager: Found {sockets.Length} sockets in scene.");
+        }
     }
 
     // This method is called by DragObject when a shape is dropped.
@@ -66,6 +75,9 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Puzzle Solved: Well Done!");
             if (winUI != null) winUI.SetActive(true); // Show the Win UI
+            
+            // Show EndGame screen (Success - puzzle solved!)
+            EndGameUI.Show(true);
         }
     }
 
