@@ -59,7 +59,7 @@ public class PlayerJump : MonoBehaviour
     {
         Debug.Log("Game Over!"); // Print a message to the console
 
-        // Stop everything by setting the game time to 0!
-        Time.timeScale = 0f; 
+        // Show EndGame screen (Fail - hit obstacle!)
+        EndGameUI.Show(false);
     }
 }

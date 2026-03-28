@@ -67,9 +67,9 @@ public class Spawner : MonoBehaviour
     void GameClear()
     {
         isGameOver = true;
-        Debug.Log("🎉 Survived for 60 seconds! Game Clear!");
+        Debug.Log("Survived for 60 seconds! Game Clear!");
 
-        // Freeze the game time to stop everything.
-        Time.timeScale = 0f; 
+        // Show EndGame screen (Success - survived!)
+        EndGameUI.Show(true);
     }
 }
