@@ -79,6 +79,29 @@ public static class SettingsUI
         return PlayerPrefs.GetFloat(BG_VOLUME_KEY, 1f);
     }
 
+    /// <summary>
+    /// Applies the current volume settings to all AudioSources in the scene.
+    /// Background sound (looping) uses BGVolume, others use GameVolume.
+    /// </summary>
+    public static void ApplyVolumeToActiveSources()
+    {
+        float bgVol = GetBGVolume();
+        float gameVol = GetGameVolume();
+
+        AudioSource[] sources = Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        foreach (var source in sources)
+        {
+            if (source.loop)
+            {
+                source.volume = bgVol;
+            }
+            else
+            {
+                source.volume = gameVol;
+            }
+        }
+    }
+
     private static void CreateUI()
     {
         // ===== Canvas =====
@@ -131,6 +154,7 @@ public static class SettingsUI
             {
                 gameVolume = value;
                 PlayerPrefs.SetFloat(GAME_VOLUME_KEY, value);
+                ApplyVolumeToActiveSources();
             });
 
         // ===== Background Sound =====
@@ -144,6 +168,7 @@ public static class SettingsUI
             {
                 bgVolume = value;
                 PlayerPrefs.SetFloat(BG_VOLUME_KEY, value);
+                ApplyVolumeToActiveSources();
             });
 
         // ===== Main Garden button =====
