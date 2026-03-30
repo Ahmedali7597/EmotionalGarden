@@ -18,17 +18,20 @@ EditorBuildSettings:
     path: Assets/Main Garden/Scenes/GardenScene.unity
     guid: 8c10f8f8c920f1e40a107a586885cc9d
   - enabled: 1
-    path: Assets/Minigame/CloudGame/CloudGame.unity
-    guid: 4104de39fba46314689854b8ed58a0a4
-  - enabled: 1
     path: Assets/Minigame/DarkGame/DarkGame.unity
     guid: b26b4e432fb42d041bcd4fc6a0f39df0
   - enabled: 1
-    path: Assets/Minigame/PuzzleGame/PuzzleGame.unity
-    guid: 72db30e716dc120429c93f19a89241f1
-  - enabled: 1
     path: Assets/Minigame/RainGame/RainGame.unity
     guid: e63098d4743b4b24fb4399925fe14387
+  - enabled: 1
+    path: Assets/Minigame/MainGarden/MainGarden.unity
+    guid: 6b071fb65a7798d4bac51fc055ee21ee
+  - enabled: 1
+    path: Assets/Minigame/CloudGame/CloudGame.unity
+    guid: 4104de39fba46314689854b8ed58a0a4
+  - enabled: 1
+    path: Assets/Minigame/PuzzleGame/PuzzleGame.unity
+    guid: 72db30e716dc120429c93f19a89241f1
   - enabled: 1
     path: Assets/Minigame/RunGame/RunGame.unity
     guid: d391680bfa1c6bd41b9862f475e42bf0
