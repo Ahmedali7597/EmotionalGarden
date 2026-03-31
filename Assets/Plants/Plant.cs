@@ -10,6 +10,22 @@ public class Plant : MonoBehaviour
     public Sprite[] growthSprites; //array of sprites for the different growth levels 
 
     /// <summary>
+    /// On start, ensure the SpriteRenderer exists and show the initial growth sprite
+    /// </summary>
+    void Start()
+    {
+        // Auto-wire SpriteRenderer if not assigned
+        if (plantSprite == null)
+            plantSprite = GetComponent<SpriteRenderer>();
+
+        // Show the initial growth stage sprite
+        if (plantSprite != null && growthSprites != null && growthSprites.Length > currentGrowth && growthSprites[currentGrowth] != null)
+        {
+            plantSprite.sprite = growthSprites[currentGrowth];
+        }
+    }
+
+    /// <summary>
     /// Increase the growth of the plant if it is less than the max possible 
     /// </summary>
     public void Grow()
