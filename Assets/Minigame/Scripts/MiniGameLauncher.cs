@@ -32,6 +32,6 @@ public static class MiniGameLauncher
     {
         Debug.Log("[MiniGameLauncher] Returning to Garden...");
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainGarden");
+        SceneManager.LoadScene("DefaultGarden");
     }
 }

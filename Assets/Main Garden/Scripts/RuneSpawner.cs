@@ -13,7 +13,7 @@ public class RuneSpawner : MonoBehaviour
     public GameObject[] runePrefabs;
 
     [Tooltip("Time in seconds between each rune spawn.")]
-    public float spawnInterval = 30f;
+    public float spawnInterval = 15f;
 
     [Header("Spawn Area (camera-based)")]
     [Tooltip("Padding from the camera edges so the rune doesn't spawn off-screen.")]
