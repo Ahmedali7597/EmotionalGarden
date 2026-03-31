@@ -57,11 +57,21 @@ public class PlantClickHandler : MonoBehaviour
 
         if (hit.collider != null)
         {
+            // Check if a plant was clicked
             Plant plant = hit.collider.GetComponent<Plant>();
             if (plant != null)
             {
                 Debug.Log($"[PlantClickHandler] {plant.gameObject.name} clicked — growing this plant.");
                 plant.Grow();
+                return;
+            }
+
+            // Check if a rune was clicked
+            RuneClickable rune = hit.collider.GetComponent<RuneClickable>();
+            if (rune != null)
+            {
+                rune.OnClicked();
+                return;
             }
         }
     }
