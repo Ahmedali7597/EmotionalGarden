@@ -30,7 +30,7 @@ public class Plant : MonoBehaviour
     /// </summary>
     public void Grow()
     {
-        if (currentGrowth < maxGrowth)
+        if (currentGrowth < maxGrowth && currentGrowth < growthSprites.Length - 1)
         {
             currentGrowth++;
             UpdateAppearance();
@@ -41,7 +41,7 @@ public class Plant : MonoBehaviour
     /// </summary>
     void UpdateAppearance()
     {
-        if (plantSprite != null && growthSprites.Length > currentGrowth)
+        if (plantSprite != null && growthSprites.Length > currentGrowth && growthSprites[currentGrowth] != null)
         {
             plantSprite.sprite = growthSprites[currentGrowth];
         }

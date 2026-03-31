@@ -15,6 +15,7 @@ public class MainGardenManager : MonoBehaviour
         Debug.Log("Garden started with emotion: " + currentEmotion);
     }
 
+
     /// <summary>
     /// Update the displayed sprite for each plant in the garden 
     /// </summary>
