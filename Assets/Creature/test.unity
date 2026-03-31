@@ -159,7 +159,7 @@ MonoBehaviour:
   - {fileID: 464220606094743025, guid: a5cde17068573b94fb39853dad07c75d, type: 3}
   - {fileID: 4707060367138582242, guid: 4ca9f015dc54ea14bbb77df7aeaf885d, type: 3}
   - {fileID: 3045354380670962193, guid: 3723aec2fcb81d941b6c8e1d8a1ce540, type: 3}
-  spawnCount: 7
+  spawnCount: 15
   spawnRadius: 2
 --- !u!4 &30263907
 Transform:

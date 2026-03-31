@@ -12,6 +12,7 @@ public class SlimeManager : MonoBehaviour
     // The radius to scatter the slimes so they don't overlap.
     public float spawnRadius = 2.0f;
 
+    int randomIndex;
     void Start()
     {
         // Spawn the specified number of random slimes when the game starts.
@@ -26,12 +27,12 @@ public class SlimeManager : MonoBehaviour
             Debug.LogWarning("No slime prefabs have been assigned!");
             return;
         }
-
+        int randomIndex = Random.Range(0, spawnCount);
         // Repeat the spawning process for the 'spawnCount' amount.
-        for (int i = 0; i < spawnCount; i++)
+        for (int i = 0; i < randomIndex; i++)
         {
             // 1. Pick a random number between 0 and the number of prefabs.
-            int randomIndex = Random.Range(0, slimePrefabs.Length);
+            randomIndex = Random.Range(0, slimePrefabs.Length);
 
             // 2. Select the slime prefab corresponding to the random number.
             GameObject selectedSlime = slimePrefabs[randomIndex];

@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 8814750353923402454}
   - component: {fileID: 8782139754614728714}
   - component: {fileID: 7020010349998820377}
-  - component: {fileID: 6251548962393072663}
   - component: {fileID: 955444424257581505}
+  - component: {fileID: 6251548962393072663}
   m_Layer: 0
   m_Name: Slime1 1
   m_TagString: Untagged
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -116,6 +116,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &955444424257581505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101828637032849386}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 644ffff8de586a946be0f72c9d473689, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlimeObstacle
+  speed: 5
+  deadZone: -10
 --- !u!114 &6251548962393072663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,21 +145,7 @@ MonoBehaviour:
   speed: 2
   garden: {fileID: 0}
   timeToChangeDirection: 2
-  minX: -1.59
-  maxX: 1.6
-  minY: -3.38
-  maxY: 2.4
---- !u!114 &955444424257581505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3101828637032849386}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 644ffff8de586a946be0f72c9d473689, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SlimeObstacle
-  speed: 5
-  deadZone: -10
+  minX: -1.82
+  maxX: 1.77
+  minY: -4.6
+  maxY: 0
