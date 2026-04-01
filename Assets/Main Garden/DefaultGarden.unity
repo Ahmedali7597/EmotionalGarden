@@ -148,7 +148,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.14, y: -2.535, z: 0}
-  m_LocalScale: {x: 3.5, y: 3.5, z: 0.5}
+  m_LocalScale: {x: 3, y: 3, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -700,6 +700,7 @@ GameObject:
   - component: {fileID: 593741634}
   - component: {fileID: 593741636}
   - component: {fileID: 593741637}
+  - component: {fileID: 593741638}
   m_Layer: 0
   m_Name: GardenManager
   m_TagString: Untagged
@@ -779,6 +780,20 @@ MonoBehaviour:
   - {fileID: 459622085791228378, guid: a35b63c1e537b9342ac040288f9f4f23, type: 3}
   spawnInterval: 30
   edgePadding: 1
+--- !u!114 &593741638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 593741633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8136c8100583ac94281e63e54a629b9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlantRandomizer
+  tilemap: {fileID: 1610827506}
+  dirtTileName: ground_grass_bricks_264
 --- !u!1 &612814550
 GameObject:
   m_ObjectHideFlags: 0
@@ -875,7 +890,6 @@ MonoBehaviour:
   maxGrowth: 3
   plantSprite: {fileID: 646686911}
   growthSprites:
-  - {fileID: 8770373422609272313, guid: 4662a61ddc1fd724abe9c18f06788e53, type: 3}
   - {fileID: 6372940984079891689, guid: 4662a61ddc1fd724abe9c18f06788e53, type: 3}
   - {fileID: 501674891198874538, guid: 4662a61ddc1fd724abe9c18f06788e53, type: 3}
   - {fileID: -8864902006001986957, guid: 4662a61ddc1fd724abe9c18f06788e53, type: 3}
@@ -1013,7 +1027,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.171, y: -0.565, z: 0}
-  m_LocalScale: {x: 3.5, y: 3.5, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1172,8 +1186,8 @@ Transform:
   m_GameObject: {fileID: 914523445}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.159, y: -1.538, z: 0}
-  m_LocalScale: {x: 3.5, y: 3.5, z: 1}
+  m_LocalPosition: {x: 1.159, y: -1.55, z: 0}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
