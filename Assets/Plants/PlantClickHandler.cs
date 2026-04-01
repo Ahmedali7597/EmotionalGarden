@@ -52,13 +52,14 @@ public class PlantClickHandler : MonoBehaviour
             return;
 
         // Cast a ray from the camera through the click/tap position
+        // Use RaycastAll so the Boundary collider doesn't block clicks on plants/runes
         Vector2 worldPoint = mainCam.ScreenToWorldPoint(screenPos);
-        RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(worldPoint, Vector2.zero);
 
-        if (hit.collider != null)
+        for (int i = 0; i < hits.Length; i++)
         {
             // Check if a plant was clicked
-            Plant plant = hit.collider.GetComponent<Plant>();
+            Plant plant = hits[i].collider.GetComponent<Plant>();
             if (plant != null)
             {
                 Debug.Log($"[PlantClickHandler] {plant.gameObject.name} clicked — growing this plant.");
@@ -67,7 +68,7 @@ public class PlantClickHandler : MonoBehaviour
             }
 
             // Check if a rune was clicked
-            RuneClickable rune = hit.collider.GetComponent<RuneClickable>();
+            RuneClickable rune = hits[i].collider.GetComponent<RuneClickable>();
             if (rune != null)
             {
                 rune.OnClicked();
