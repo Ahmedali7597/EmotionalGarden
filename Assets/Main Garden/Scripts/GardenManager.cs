@@ -5,30 +5,29 @@ using System.Collections;
 /// <summary>
 /// Main Garden scene controller.
 /// - Spawns avatar from GameData
-/// - Sets placeholder background color based on emotion (to be replaced later with real backgrounds)
+/// - Swaps sky background SpriteRenderers based on selected emotion
+/// - Sets avatar sorting order above plants
 /// - Manages minigame UI button (top-right, appears on random timer)
-/// - Settings button to reselect emotion (NOT avatar)
 /// </summary>
 public class GardenManager : MonoBehaviour
 {
-    [Header("Background")]
-    [SerializeField] private Camera mainCamera;
+    [Header("Sky Backgrounds (SpriteRenderer GameObjects)")]
+    [SerializeField] private GameObject calmBackground;
+    [SerializeField] private GameObject sadBackground;
+    [SerializeField] private GameObject anxiousBackground;
+    [SerializeField] private GameObject energeticBackground;
 
-    [Header("Minigame UI")]
-    [SerializeField] private Button minigameButton;
-    [SerializeField] private float minigameTimerMin = 30f;
-    [SerializeField] private float minigameTimerMax = 60f;
+    [Header("Avatar Spawning")]
+    [SerializeField] private AvatarSpawner avatarSpawner;
 
-    [Header("Settings UI")]
-    [SerializeField] private Button settingsButton;
-    [SerializeField] private GameObject settingsPanel;
-    [SerializeField] private Button emotionSadButton;
-    [SerializeField] private Button emotionCalmButton;
-    [SerializeField] private Button emotionEnergeticButton;
-    [SerializeField] private Button emotionAnxiousButton;
-    [SerializeField] private Button closeSettingsButton;
+    [Header("Movement")]
+    [SerializeField] private AvatarMovementController movementController;
+    [SerializeField] private AvatarRandomWander randomWander;
+    [SerializeField] private Collider2D boundary;
 
-    private Coroutine _minigameTimerCoroutine;
+    [Header("Avatar Sorting")]
+    [Tooltip("Sorting order for the avatar sprite (plants default to 0).")]
+    [SerializeField] private int avatarSortingOrder = 10;
 
     private void Awake()
     {
@@ -37,122 +36,102 @@ public class GardenManager : MonoBehaviour
 
     private void Start()
     {
-        if (mainCamera == null)
-            mainCamera = Camera.main;
+        // Apply sky background based on selected emotion
+        ApplySkyBackground();
 
-        // ── Self-wire and spawn avatar ────────────────────────────────
-        var spawner    = FindFirstObjectByType<AvatarSpawner>();
-        var movement   = FindFirstObjectByType<AvatarMovementController>();
-        var wander     = FindFirstObjectByType<AvatarRandomWander>();
-        var boundaryGO = GameObject.Find("Boundary");
-        Collider2D bounds = boundaryGO != null ? boundaryGO.GetComponent<Collider2D>() : null;
+        // Spawn avatar and wire up movement
+        SpawnAndWireAvatar();
+    }
 
-        if (spawner != null)
+    /// <summary>
+    /// Show only the sky background matching the selected emotion.
+    /// </summary>
+    private void ApplySkyBackground()
+    {
+        GameData.Emotion emotion = GameData.Emotion.Calm;
+        if (GameData.Instance != null && GameData.Instance.EmotionChosen)
         {
-            var avatar = spawner.SpawnFromGameData();
-            if (avatar != null)
+            emotion = GameData.Instance.SelectedEmotion;
+        }
+
+        // Disable all backgrounds first
+        if (calmBackground != null) calmBackground.SetActive(false);
+        if (sadBackground != null) sadBackground.SetActive(false);
+        if (anxiousBackground != null) anxiousBackground.SetActive(false);
+        if (energeticBackground != null) energeticBackground.SetActive(false);
+
+        // Enable the matching one
+        switch (emotion)
+        {
+            case GameData.Emotion.Sad:
+                if (sadBackground != null) sadBackground.SetActive(true);
+                break;
+            case GameData.Emotion.Anxious:
+                if (anxiousBackground != null) anxiousBackground.SetActive(true);
+                break;
+            case GameData.Emotion.Energetic:
+                if (energeticBackground != null) energeticBackground.SetActive(true);
+                break;
+            case GameData.Emotion.Calm:
+            default:
+                if (calmBackground != null) calmBackground.SetActive(true);
+                break;
+        }
+
+        Debug.Log($"[GardenManager] Sky background set to: {emotion}");
+    }
+
+    /// <summary>
+    /// Spawn the avatar from GameData and wire up movement controller + wander.
+    /// </summary>
+    private void SpawnAndWireAvatar()
+    {
+        if (avatarSpawner == null)
+        {
+            Debug.LogWarning("[GardenManager] No AvatarSpawner assigned.");
+            return;
+        }
+
+        AvatarController avatar = avatarSpawner.SpawnFromGameData();
+        if (avatar == null)
+        {
+            Debug.LogWarning("[GardenManager] Avatar spawn failed.");
+            return;
+        }
+
+        // Set avatar scale to 2
+        avatar.transform.localScale = new Vector3(2f, 2f, 1f);
+
+        // Set avatar sorting order above plants
+        var sr = avatar.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.sortingOrder = avatarSortingOrder;
+        }
+
+        // Wire garden bounds to avatar
+        if (boundary != null)
+        {
+            avatar.SetGardenBounds(boundary);
+        }
+
+        // Wire movement controller
+        if (movementController != null)
+        {
+            movementController.SetAvatar(avatar);
+            movementController.SetBoundary(boundary);
+        }
+
+        // Wire random wander
+        if (randomWander != null)
+        {
+            randomWander.SetAvatar(avatar);
+            if (movementController != null)
             {
-                avatar.SetGardenBounds(bounds);
-                if (movement != null)
-                {
-                    movement.SetBoundary(bounds);
-                    movement.SetWander(wander);
-                    movement.SetAvatar(avatar);
-                }
-                wander?.SetAvatar(avatar);
+                movementController.SetWander(randomWander);
             }
         }
 
-        // ── Background ───────────────────────────────────────────────
-        ApplyEmotionBackground();
-
-        // ── Minigame button — hidden, appears on timer ───────────────
-        if (minigameButton != null)
-        {
-            minigameButton.gameObject.SetActive(false);
-            minigameButton.onClick.AddListener(OnMinigameButtonClicked);
-        }
-        StartMinigameTimer();
-
-        // ── Settings ─────────────────────────────────────────────────
-        if (settingsButton != null)
-            settingsButton.onClick.AddListener(OnSettingsClicked);
-        if (closeSettingsButton != null)
-            closeSettingsButton.onClick.AddListener(OnCloseSettings);
-        if (emotionSadButton != null)
-            emotionSadButton.onClick.AddListener(() => OnEmotionReselected(GameData.Emotion.Sad));
-        if (emotionCalmButton != null)
-            emotionCalmButton.onClick.AddListener(() => OnEmotionReselected(GameData.Emotion.Calm));
-        if (emotionEnergeticButton != null)
-            emotionEnergeticButton.onClick.AddListener(() => OnEmotionReselected(GameData.Emotion.Energetic));
-        if (emotionAnxiousButton != null)
-            emotionAnxiousButton.onClick.AddListener(() => OnEmotionReselected(GameData.Emotion.Anxious));
-
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-    }
-
-    // ── Background (placeholder — uses camera background color) ───────
-    private void ApplyEmotionBackground()
-    {
-        if (mainCamera == null || GameData.Instance == null) return;
-
-        // Placeholder colors — replace with real background sprites/images later
-        mainCamera.backgroundColor = GameData.Instance.SelectedEmotion switch
-        {
-            GameData.Emotion.Sad       => new Color(0.25f, 0.30f, 0.45f), // muted blue
-            GameData.Emotion.Calm      => new Color(0.30f, 0.55f, 0.35f), // soft green
-            GameData.Emotion.Energetic => new Color(0.60f, 0.50f, 0.20f), // warm gold
-            GameData.Emotion.Anxious   => new Color(0.50f, 0.25f, 0.30f), // muted red
-            _                          => new Color(0.30f, 0.55f, 0.35f)
-        };
-    }
-
-    // ── Minigame Timer ────────────────────────────────────────────────
-    private void StartMinigameTimer()
-    {
-        if (_minigameTimerCoroutine != null)
-            StopCoroutine(_minigameTimerCoroutine);
-        _minigameTimerCoroutine = StartCoroutine(MinigameTimerRoutine());
-    }
-
-    private IEnumerator MinigameTimerRoutine()
-    {
-        float delay = Random.Range(minigameTimerMin, minigameTimerMax);
-        yield return new WaitForSeconds(delay);
-
-        if (minigameButton != null)
-            minigameButton.gameObject.SetActive(true);
-
-        _minigameTimerCoroutine = null;
-    }
-
-    private void OnMinigameButtonClicked()
-    {
-        MiniGameLauncher.LaunchRandom();
-    }
-
-    // ── Settings / Emotion Reselect ───────────────────────────────────
-    private void OnSettingsClicked()
-    {
-        if (settingsPanel != null)
-            settingsPanel.SetActive(true);
-    }
-
-    private void OnCloseSettings()
-    {
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-    }
-
-    private void OnEmotionReselected(GameData.Emotion emotion)
-    {
-        GameData.Instance.SelectedEmotion = emotion;
-        ApplyEmotionBackground();
-
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-
-        Debug.Log($"[GardenManager] Emotion changed to {emotion}. Background updated.");
+        Debug.Log("[GardenManager] Avatar spawned and wired up successfully.");
     }
 }

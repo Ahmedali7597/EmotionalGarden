@@ -5,8 +5,9 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// Reads pointer taps via the new Input System.
 /// Tap inside the garden boundary → avatar walks there and waters.
-/// Ignores taps on UI elements.
+/// Ignores taps on UI elements and settings overlay.
 /// Pauses random wander on tap; wander resumes after watering completes.
+/// Uses Pointer.current which handles both mouse and touch input.
 /// </summary>
 public class AvatarMovementController : MonoBehaviour
 {
@@ -25,6 +26,9 @@ public class AvatarMovementController : MonoBehaviour
     {
         if (_avatar == null || _avatar.IsWatering) return;
 
+        // Don't process if settings is open
+        if (SettingsUI.isOpen) return;
+
         var pointer = Pointer.current;
         if (pointer == null || !pointer.press.wasPressedThisFrame) return;
 
@@ -35,8 +39,13 @@ public class AvatarMovementController : MonoBehaviour
                                         Mathf.Abs(_mainCamera.transform.position.z));
         Vector2 worldPos  = _mainCamera.ScreenToWorldPoint(screen3);
 
-        if (_boundaryCollider != null && !_boundaryCollider.OverlapPoint(worldPos))
-            return;
+        // Use bounds.Contains instead of OverlapPoint — works regardless of trigger/physics settings
+        if (_boundaryCollider != null)
+        {
+            Bounds b = _boundaryCollider.bounds;
+            if (!b.Contains(new Vector3(worldPos.x, worldPos.y, b.center.z)))
+                return;
+        }
 
         _randomWander?.Pause();
 

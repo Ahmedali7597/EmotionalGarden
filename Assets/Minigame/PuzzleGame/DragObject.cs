@@ -113,7 +113,7 @@ public class DragObject : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoi
                 {
                     rb.linearVelocity = Vector2.zero; // Set velocity to 0
                     rb.angularVelocity = 0f;      // Set angular velocity to 0
-                    rb.isKinematic = true;        // Change to Kinematic mode (Stops gravity/collisions)
+                    rb.bodyType = RigidbodyType2D.Kinematic; // Change to Kinematic mode (Stops gravity/collisions)
                 }
 
                 // Disable the collider (Prevent further movement)

@@ -2,13 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Start screen — shows a Start button (and placeholder Settings button).
+/// Start screen — shows a Start button only.
 /// Start → Avatar Selection scene.
 /// </summary>
 public class StartSceneUI : MonoBehaviour
 {
     [SerializeField] private Button startButton;
-    [SerializeField] private Button settingsButton;
 
     private void Awake()
     {
@@ -19,21 +18,13 @@ public class StartSceneUI : MonoBehaviour
     {
         if (startButton == null)
             startButton = FindButton("StartButton");
-        if (settingsButton == null)
-            settingsButton = FindButton("SettingsButton");
 
-        if (startButton)    startButton.onClick.AddListener(OnStartClicked);
-        if (settingsButton) settingsButton.onClick.AddListener(OnSettingsClicked);
+        if (startButton) startButton.onClick.AddListener(OnStartClicked);
     }
 
     private void OnStartClicked()
     {
         SceneFlow.GoToAvatarSelect();
-    }
-
-    private void OnSettingsClicked()
-    {
-        Debug.Log("[StartScene] Settings placeholder — not yet implemented.");
     }
 
     private Button FindButton(string name)
