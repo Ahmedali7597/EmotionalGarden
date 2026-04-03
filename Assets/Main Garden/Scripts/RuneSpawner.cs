@@ -106,6 +106,13 @@ public class RuneSpawner : MonoBehaviour
             }
         }
 
+        // Set sorting order above plants (plants are 2, avatar is 10, runes are 5)
+        SpriteRenderer runeSR = currentRune.GetComponent<SpriteRenderer>();
+        if (runeSR != null)
+        {
+            runeSR.sortingOrder = 5;
+        }
+
         // Add the clickable component so PlantClickHandler can detect it
         if (currentRune.GetComponent<RuneClickable>() == null)
         {

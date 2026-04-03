@@ -1,27 +1,20 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// Place on a single manager GameObject (e.g. GardenManager).
-/// Detects clicks/taps via the new Input System and 2D physics raycast.
+/// Detects clicks/taps via the new Input System and 2D physics overlap.
 /// When the player clicks/taps a plant, it grows only that plant.
+/// Uses Pointer.current which handles both mouse and touch input.
 /// </summary>
 public class PlantClickHandler : MonoBehaviour
 {
     private Camera mainCam;
-    private Mouse mouse;
-    private Touchscreen touchscreen;
 
     void Start()
     {
         mainCam = Camera.main;
-        if (mainCam == null)
-        {
-            Debug.LogWarning("[PlantClickHandler] No Main Camera found in scene.");
-        }
-
-        mouse = Mouse.current;
-        touchscreen = Touchscreen.current;
     }
 
     void Update()
@@ -32,34 +25,30 @@ public class PlantClickHandler : MonoBehaviour
             if (mainCam == null) return;
         }
 
-        bool clicked = false;
-        Vector2 screenPos = Vector2.zero;
+        // Don't process if settings UI is open
+        if (SettingsUI.isOpen) return;
 
-        // Check mouse click
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
-        {
-            clicked = true;
-            screenPos = mouse.position.ReadValue();
-        }
-        // Check touch input
-        else if (touchscreen != null && touchscreen.primaryTouch.press.wasPressedThisFrame)
-        {
-            clicked = true;
-            screenPos = touchscreen.primaryTouch.position.ReadValue();
-        }
-
-        if (!clicked)
+        // Use Pointer.current — works for both mouse and touch
+        var pointer = Pointer.current;
+        if (pointer == null || !pointer.press.wasPressedThisFrame)
             return;
 
-        // Cast a ray from the camera through the click/tap position
-        // Use RaycastAll so the Boundary collider doesn't block clicks on plants/runes
+        // Don't process if clicking on UI
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        Vector2 screenPos = pointer.position.ReadValue();
         Vector2 worldPoint = mainCam.ScreenToWorldPoint(screenPos);
-        RaycastHit2D[] hits = Physics2D.RaycastAll(worldPoint, Vector2.zero);
+
+        // Use OverlapPointAll — reliable point-based 2D hit detection
+        Collider2D[] hits = Physics2D.OverlapPointAll(worldPoint);
 
         for (int i = 0; i < hits.Length; i++)
         {
+            if (hits[i] == null) continue;
+
             // Check if a plant was clicked
-            Plant plant = hits[i].collider.GetComponent<Plant>();
+            Plant plant = hits[i].GetComponent<Plant>();
             if (plant != null)
             {
                 Debug.Log($"[PlantClickHandler] {plant.gameObject.name} clicked — growing this plant.");
@@ -68,7 +57,7 @@ public class PlantClickHandler : MonoBehaviour
             }
 
             // Check if a rune was clicked
-            RuneClickable rune = hits[i].collider.GetComponent<RuneClickable>();
+            RuneClickable rune = hits[i].GetComponent<RuneClickable>();
             if (rune != null)
             {
                 rune.OnClicked();

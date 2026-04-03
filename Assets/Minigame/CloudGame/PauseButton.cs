@@ -10,35 +10,42 @@ public class PauseButton : MonoBehaviour
     {
         if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
         {
+            if (Camera.main == null) return;
+
             Vector2 screenPosition = Pointer.current.position.ReadValue();
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(screenPosition);
-            RaycastHit2D hit = Physics2D.Raycast(touchPosition, Vector2.zero);
 
-            if (hit.collider != null && hit.collider.gameObject == gameObject)
+            // Use OverlapPointAll for reliable 2D point detection
+            Collider2D[] hits = Physics2D.OverlapPointAll(touchPosition);
+            for (int i = 0; i < hits.Length; i++)
             {
-                TogglePause();
+                if (hits[i] != null && hits[i].gameObject == gameObject)
+                {
+                    TogglePause();
+                    return;
+                }
             }
         }
     }
 
     private void TogglePause()
     {
-        // FIX: If the game is already complete, ignore clicks on the pause button!
+        // If the game is already complete, ignore clicks on the pause button
         if (Sun.isCompleted)
         {
-            return; // Exit the function early so it doesn't unpause
+            return;
         }
 
-        isPaused = !isPaused; // Flip the pause state
+        isPaused = !isPaused;
 
         if (isPaused)
         {
-            Time.timeScale = 0f; // Freeze time
+            Time.timeScale = 0f;
             Instantiate(pauseScreen, Vector3.zero, Quaternion.identity);
         }
         else
         {
-            Time.timeScale = 1f; // Resume time
+            Time.timeScale = 1f;
         }
     }
 }

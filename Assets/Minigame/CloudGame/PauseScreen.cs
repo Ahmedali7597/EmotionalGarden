@@ -3,25 +3,25 @@ using UnityEngine.InputSystem;
 
 public class PauseScreen : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        if(Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
+        if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame)
         {
+            if (Camera.main == null) return;
+
             Vector2 screenPosition = Pointer.current.position.ReadValue();
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(screenPosition);
-            RaycastHit2D hit = Physics2D.Raycast(touchPosition, Vector2.zero);
 
-            if (hit.collider != null && hit.collider.gameObject == gameObject)
+            // Use OverlapPointAll for reliable 2D point detection
+            Collider2D[] hits = Physics2D.OverlapPointAll(touchPosition);
+            for (int i = 0; i < hits.Length; i++)
             {
-                Destroy(gameObject); // Remove the pause screen
-                Time.timeScale = 1f; // Resume time
+                if (hits[i] != null && hits[i].gameObject == gameObject)
+                {
+                    Destroy(gameObject);
+                    Time.timeScale = 1f;
+                    return;
+                }
             }
         }
     }

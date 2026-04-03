@@ -102,17 +102,23 @@ public static class SettingsUI
         }
     }
 
+    private static bool IsInGardenScene()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        return sceneName == SceneFlow.GardenScene || sceneName == "GardenScene";
+    }
+
     private static void CreateUI()
     {
         // ===== Canvas =====
         canvasGO = new GameObject("SettingsCanvas");
         Canvas canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 900; // Lower than EndGameUI (999)
+        canvas.sortingOrder = 900;
 
         CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.referenceResolution = new Vector2(1080, 1920);
         scaler.matchWidthOrHeight = 0.5f;
 
         canvasGO.AddComponent<GraphicRaycaster>();
@@ -134,23 +140,23 @@ public static class SettingsUI
         panelRect.anchorMin = new Vector2(0.5f, 0.5f);
         panelRect.anchorMax = new Vector2(0.5f, 0.5f);
         panelRect.pivot = new Vector2(0.5f, 0.5f);
-        panelRect.sizeDelta = new Vector2(750, 600);
+        panelRect.sizeDelta = new Vector2(700, 750);
         panelRect.anchoredPosition = Vector2.zero;
 
         // ===== "Settings" title =====
         CreateText(panelGO.transform, "TitleText", "Settings",
-            60, FontStyle.Bold, Color.white,
+            54, FontStyle.Bold, Color.white,
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(600, 90), new Vector2(0, -60));
+            new Vector2(600, 80), new Vector2(0, -50));
 
         // ===== Game Sound =====
         CreateText(panelGO.transform, "GameSoundLabel", "Game Sound",
-            36, FontStyle.Normal, new Color(0.9f, 0.9f, 0.9f),
+            32, FontStyle.Normal, new Color(0.9f, 0.9f, 0.9f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(600, 50), new Vector2(0, -140));
+            new Vector2(600, 45), new Vector2(0, -120));
 
         CreateSlider(panelGO.transform, "GameSoundSlider",
-            new Vector2(0, -190), gameVolume, (value) =>
+            new Vector2(0, -165), gameVolume, (value) =>
             {
                 gameVolume = value;
                 PlayerPrefs.SetFloat(GAME_VOLUME_KEY, value);
@@ -159,21 +165,21 @@ public static class SettingsUI
 
         // ===== Background Sound =====
         CreateText(panelGO.transform, "BGSoundLabel", "Background Sound",
-            36, FontStyle.Normal, new Color(0.9f, 0.9f, 0.9f),
+            32, FontStyle.Normal, new Color(0.9f, 0.9f, 0.9f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(600, 50), new Vector2(0, -260));
+            new Vector2(600, 45), new Vector2(0, -225));
 
         CreateSlider(panelGO.transform, "BGSoundSlider",
-            new Vector2(0, -310), bgVolume, (value) =>
+            new Vector2(0, -270), bgVolume, (value) =>
             {
                 bgVolume = value;
                 PlayerPrefs.SetFloat(BG_VOLUME_KEY, value);
                 ApplyVolumeToActiveSources();
             });
 
-        // ===== Main Garden button =====
-        CreateButton(panelGO.transform, "MainGardenBtn", "Main Garden",
-            new Color(0.2f, 0.55f, 0.3f), new Vector2(0, -410), () =>
+        // ===== Reselect Emotion button =====
+        CreateButton(panelGO.transform, "ReselectEmotionBtn", "Reselect Emotion",
+            new Color(0.6f, 0.4f, 0.7f), new Vector2(0, -360), () =>
             {
                 isOpen = false;
                 PlayerPrefs.SetFloat(GAME_VOLUME_KEY, gameVolume);
@@ -181,12 +187,31 @@ public static class SettingsUI
                 PlayerPrefs.Save();
                 if (canvasGO != null) Object.Destroy(canvasGO);
                 canvasGO = null;
-                MiniGameLauncher.ReturnToGarden();
+                Time.timeScale = 1f;
+                SceneFlow.GoToEmotionSelect();
             });
 
+        // ===== Main Garden button (only show when NOT in garden scene) =====
+        if (!IsInGardenScene())
+        {
+            CreateButton(panelGO.transform, "MainGardenBtn", "Main Garden",
+                new Color(0.2f, 0.55f, 0.3f), new Vector2(0, -450), () =>
+                {
+                    isOpen = false;
+                    PlayerPrefs.SetFloat(GAME_VOLUME_KEY, gameVolume);
+                    PlayerPrefs.SetFloat(BG_VOLUME_KEY, bgVolume);
+                    PlayerPrefs.Save();
+                    if (canvasGO != null) Object.Destroy(canvasGO);
+                    canvasGO = null;
+                    Time.timeScale = 1f;
+                    MiniGameLauncher.ReturnToGarden();
+                });
+        }
+
         // ===== Resume button (close) =====
+        float resumeY = IsInGardenScene() ? -450f : -540f;
         CreateButton(panelGO.transform, "ResumeBtn", "Resume",
-            new Color(0.45f, 0.45f, 0.55f), new Vector2(0, -510), () =>
+            new Color(0.45f, 0.45f, 0.55f), new Vector2(0, resumeY), () =>
             {
                 Hide();
             });
@@ -197,13 +222,12 @@ public static class SettingsUI
     private static void CreateSlider(Transform parent, string name,
         Vector2 position, float initialValue, UnityEngine.Events.UnityAction<float> onValueChanged)
     {
-        // Slider root
         GameObject sliderGO = CreateUIElement(name, parent);
         RectTransform sliderRect = sliderGO.GetComponent<RectTransform>();
         sliderRect.anchorMin = new Vector2(0.5f, 1f);
         sliderRect.anchorMax = new Vector2(0.5f, 1f);
         sliderRect.pivot = new Vector2(0.5f, 0.5f);
-        sliderRect.sizeDelta = new Vector2(500, 30);
+        sliderRect.sizeDelta = new Vector2(500, 40);
         sliderRect.anchoredPosition = position;
 
         Slider slider = sliderGO.AddComponent<Slider>();
@@ -216,16 +240,16 @@ public static class SettingsUI
         Image bgImg = bgGO.AddComponent<Image>();
         bgImg.color = new Color(0.25f, 0.25f, 0.35f);
         RectTransform bgRect = bgGO.GetComponent<RectTransform>();
-        bgRect.anchorMin = new Vector2(0f, 0.35f);
-        bgRect.anchorMax = new Vector2(1f, 0.65f);
+        bgRect.anchorMin = new Vector2(0f, 0.25f);
+        bgRect.anchorMax = new Vector2(1f, 0.75f);
         bgRect.sizeDelta = Vector2.zero;
         bgRect.anchoredPosition = Vector2.zero;
 
         // Fill Area
         GameObject fillAreaGO = CreateUIElement("Fill Area", sliderGO.transform);
         RectTransform fillAreaRect = fillAreaGO.GetComponent<RectTransform>();
-        fillAreaRect.anchorMin = new Vector2(0f, 0.35f);
-        fillAreaRect.anchorMax = new Vector2(1f, 0.65f);
+        fillAreaRect.anchorMin = new Vector2(0f, 0.25f);
+        fillAreaRect.anchorMax = new Vector2(1f, 0.75f);
         fillAreaRect.sizeDelta = Vector2.zero;
         fillAreaRect.anchoredPosition = Vector2.zero;
 
@@ -245,14 +269,13 @@ public static class SettingsUI
         Image handleImg = handleGO.AddComponent<Image>();
         handleImg.color = Color.white;
         RectTransform handleRect = handleGO.GetComponent<RectTransform>();
-        handleRect.sizeDelta = new Vector2(30, 30);
+        handleRect.sizeDelta = new Vector2(40, 40);
 
         // Connect slider references
         slider.fillRect = fillRect;
         slider.handleRect = handleRect;
         slider.targetGraphic = handleImg;
 
-        // Color transition settings
         ColorBlock colors = slider.colors;
         colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f);
         colors.pressedColor = new Color(0.7f, 0.7f, 0.7f);
@@ -278,14 +301,14 @@ public static class SettingsUI
         btnRect.anchorMin = new Vector2(0.5f, 1f);
         btnRect.anchorMax = new Vector2(0.5f, 1f);
         btnRect.pivot = new Vector2(0.5f, 0.5f);
-        btnRect.sizeDelta = new Vector2(400, 70);
+        btnRect.sizeDelta = new Vector2(400, 65);
         btnRect.anchoredPosition = position;
 
         GameObject txtGO = CreateUIElement("Text", btnGO.transform);
         Text btnText = txtGO.AddComponent<Text>();
         btnText.text = label;
         btnText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        btnText.fontSize = 36;
+        btnText.fontSize = 32;
         btnText.fontStyle = FontStyle.Bold;
         btnText.alignment = TextAnchor.MiddleCenter;
         btnText.color = Color.white;

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Marker component added to spawned slimes in the garden.
@@ -14,6 +13,6 @@ public class RuneClickable : MonoBehaviour
     public void OnClicked()
     {
         Debug.Log($"[RuneClickable] {gameObject.name} clicked — launching random minigame!");
-        SceneManager.LoadScene("MainGarden");
+        MiniGameLauncher.LaunchRandom();
     }
 }
