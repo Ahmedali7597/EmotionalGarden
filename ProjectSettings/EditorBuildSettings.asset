@@ -16,11 +16,11 @@ EditorBuildSettings:
     guid: c437b486b28611c4bb763a33d6f9b50f
   - enabled: 1
     path: Assets/Main Garden/Scenes/GardenScene.unity
-    guid: 8c10f8f8c920f1e40a107a586885cc9d
+    guid: c59cad689ad226c4d8f8a7ce0886806c
   - enabled: 1
     path: Assets/Minigame/DarkGame/DarkGame.unity
     guid: b26b4e432fb42d041bcd4fc6a0f39df0
-  - enabled: 1
+  - enabled: 0
     path: Assets/Minigame/RainGame/RainGame.unity
     guid: e63098d4743b4b24fb4399925fe14387
   - enabled: 1
