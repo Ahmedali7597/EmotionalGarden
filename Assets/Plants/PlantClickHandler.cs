@@ -7,10 +7,16 @@ using UnityEngine.EventSystems;
 /// Detects clicks/taps via the new Input System and 2D physics overlap.
 /// When the player clicks/taps a plant, it grows only that plant.
 /// Uses Pointer.current which handles both mouse and touch input.
+/// 
+/// Includes cooldown to prevent rapid-fire clicks from causing issues.
 /// </summary>
 public class PlantClickHandler : MonoBehaviour
 {
     private Camera mainCam;
+
+    // Cooldown to prevent rapid-fire clicks from causing state issues
+    private float lastClickRealTime = -1f;
+    private const float CLICK_COOLDOWN = 0.15f;
 
     void Start()
     {
@@ -27,6 +33,12 @@ public class PlantClickHandler : MonoBehaviour
 
         // Don't process if settings UI is open
         if (SettingsUI.isOpen) return;
+
+        // Don't process if end game screen is showing
+        if (EndGameUI.isShowing) return;
+
+        // Cooldown check (use unscaled time since timeScale may be 0)
+        if (Time.realtimeSinceStartup - lastClickRealTime < CLICK_COOLDOWN) return;
 
         // Use Pointer.current — works for both mouse and touch
         var pointer = Pointer.current;
@@ -51,6 +63,7 @@ public class PlantClickHandler : MonoBehaviour
             Plant plant = hits[i].GetComponent<Plant>();
             if (plant != null)
             {
+                lastClickRealTime = Time.realtimeSinceStartup;
                 Debug.Log($"[PlantClickHandler] {plant.gameObject.name} clicked — growing this plant.");
                 plant.Grow();
                 return;
@@ -60,6 +73,7 @@ public class PlantClickHandler : MonoBehaviour
             RuneClickable rune = hits[i].GetComponent<RuneClickable>();
             if (rune != null)
             {
+                lastClickRealTime = Time.realtimeSinceStartup;
                 rune.OnClicked();
                 return;
             }

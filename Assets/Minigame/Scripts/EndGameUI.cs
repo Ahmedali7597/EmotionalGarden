@@ -2,18 +2,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 /// <summary>
 /// Utility class that programmatically creates a shared EndGame screen.
 /// Call EndGameUI.Show(true/false) from any scene.
+/// 
+/// Sprites are loaded from Resources at runtime for mobile compatibility.
+/// Place the required sprites in Assets/Resources/UI/ folder.
+/// Falls back to AssetDatabase in Editor.
 /// </summary>
 public static class EndGameUI
 {
     private static GameObject canvasGO;
     public static bool isShowing = false;
+
+    // Sprite paths
+    private const string BTN_GREEN_ROUND_ASSET = "Assets/UI/ButtonsText/ButtonText_Small_Green_Round.png";
 
     /// <summary>
     /// Displays the EndGame screen.
@@ -28,9 +32,25 @@ public static class EndGameUI
         CreateUI(success);
     }
 
+    /// <summary>
+    /// Hides and destroys the EndGame screen if showing.
+    /// </summary>
+    public static void Hide()
+    {
+        if (!isShowing) return;
+        isShowing = false;
+        Time.timeScale = 1f;
+
+        if (canvasGO != null)
+        {
+            Object.Destroy(canvasGO);
+            canvasGO = null;
+        }
+    }
+
     private static void CreateUI(bool success)
     {
-        // ===== Canvas =====
+        // ===== Canvas (portrait mobile reference) =====
         canvasGO = new GameObject("EndGameCanvas");
         Canvas canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -38,7 +58,7 @@ public static class EndGameUI
 
         CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.referenceResolution = new Vector2(1080, 1920);
         scaler.matchWidthOrHeight = 0.5f;
 
         canvasGO.AddComponent<GraphicRaycaster>();
@@ -50,8 +70,7 @@ public static class EndGameUI
         GameObject bgGO = CreateUIElement("Background", canvasGO.transform);
         Image bgImage = bgGO.AddComponent<Image>();
         bgImage.color = new Color(0f, 0f, 0f, 0.75f);
-        RectTransform bgRect = bgGO.GetComponent<RectTransform>();
-        StretchToFill(bgRect);
+        StretchToFill(bgGO.GetComponent<RectTransform>());
 
         // ===== Center panel =====
         GameObject panelGO = CreateUIElement("Panel", canvasGO.transform);
@@ -61,26 +80,27 @@ public static class EndGameUI
         panelRect.anchorMin = new Vector2(0.5f, 0.5f);
         panelRect.anchorMax = new Vector2(0.5f, 0.5f);
         panelRect.pivot = new Vector2(0.5f, 0.5f);
-        panelRect.sizeDelta = new Vector2(700, 500);
+        panelRect.sizeDelta = new Vector2(700, 550);
         panelRect.anchoredPosition = Vector2.zero;
 
-        // ===== Result text (Success / Fail) =====
+        // ===== Result text =====
         GameObject textGO = CreateUIElement("ResultText", panelGO.transform);
         Text resultText = textGO.AddComponent<Text>();
         resultText.text = success ? "Success!" : "Fail...";
         resultText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        resultText.fontSize = 90;
+        resultText.fontSize = 80;
         resultText.fontStyle = FontStyle.Bold;
         resultText.alignment = TextAnchor.MiddleCenter;
         resultText.horizontalOverflow = HorizontalWrapMode.Overflow;
         resultText.verticalOverflow = VerticalWrapMode.Overflow;
         resultText.color = success ? new Color(0.3f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f);
+        resultText.raycastTarget = false;
 
         RectTransform textRect = textGO.GetComponent<RectTransform>();
-        textRect.anchorMin = new Vector2(0.5f, 0.65f);
-        textRect.anchorMax = new Vector2(0.5f, 0.65f);
+        textRect.anchorMin = new Vector2(0.5f, 0.7f);
+        textRect.anchorMax = new Vector2(0.5f, 0.7f);
         textRect.pivot = new Vector2(0.5f, 0.5f);
-        textRect.sizeDelta = new Vector2(600, 150);
+        textRect.sizeDelta = new Vector2(600, 120);
         textRect.anchoredPosition = Vector2.zero;
 
         // ===== Subtitle text =====
@@ -92,56 +112,107 @@ public static class EndGameUI
         subText.alignment = TextAnchor.MiddleCenter;
         subText.horizontalOverflow = HorizontalWrapMode.Overflow;
         subText.color = new Color(0.8f, 0.8f, 0.8f);
+        subText.raycastTarget = false;
 
         RectTransform subTextRect = subTextGO.GetComponent<RectTransform>();
-        subTextRect.anchorMin = new Vector2(0.5f, 0.48f);
-        subTextRect.anchorMax = new Vector2(0.5f, 0.48f);
+        subTextRect.anchorMin = new Vector2(0.5f, 0.52f);
+        subTextRect.anchorMax = new Vector2(0.5f, 0.52f);
         subTextRect.pivot = new Vector2(0.5f, 0.5f);
         subTextRect.sizeDelta = new Vector2(600, 60);
         subTextRect.anchoredPosition = Vector2.zero;
 
-        // ===== Main Garden button =====
-        CreateButton(panelGO.transform, "MainGardenButton", "Main Garden",
-            new Color(0.2f, 0.65f, 0.35f), new Vector2(0, -100), () =>
+        // ===== Main Garden button — matches Settings style =====
+        CreateSpriteButton(panelGO.transform, "MainGardenButton", "Main Garden",
+            BTN_GREEN_ROUND_ASSET, new Vector2(0, -120), new Vector2(450, 90), () =>
             {
                 GoToMainGarden();
             });
     }
 
-    private static void CreateButton(Transform parent, string name, string label,
-        Color bgColor, Vector2 position, UnityEngine.Events.UnityAction onClick)
+    private static void CreateSpriteButton(Transform parent, string name, string label,
+        string spriteAssetPath, Vector2 position, Vector2 size,
+        UnityEngine.Events.UnityAction onClick)
     {
         GameObject btnGO = CreateUIElement(name, parent);
-        Image btnImage = btnGO.AddComponent<Image>();
-        btnImage.color = bgColor;
 
+        // Image
+        Image btnImage = btnGO.AddComponent<Image>();
+        Sprite sprite = LoadSprite(spriteAssetPath);
+        if (sprite != null)
+        {
+            btnImage.sprite = sprite;
+            btnImage.type = Image.Type.Simple;
+            btnImage.color = Color.white;
+            btnImage.preserveAspect = false;
+        }
+        else
+        {
+            btnImage.color = new Color(0.2f, 0.65f, 0.35f);
+            Debug.LogWarning($"[EndGameUI] Could not load sprite: {spriteAssetPath}");
+        }
+        btnImage.raycastTarget = true;
+
+        // Button
         Button btn = btnGO.AddComponent<Button>();
+        btn.targetGraphic = btnImage;
+        btn.transition = Selectable.Transition.ColorTint;
+
         ColorBlock colors = btn.colors;
-        colors.highlightedColor = bgColor * 1.2f;
-        colors.pressedColor = bgColor * 0.8f;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f);
+        colors.pressedColor = new Color(0.75f, 0.75f, 0.75f);
+        colors.selectedColor = Color.white;
         btn.colors = colors;
 
         RectTransform btnRect = btnGO.GetComponent<RectTransform>();
         btnRect.anchorMin = new Vector2(0.5f, 0.5f);
         btnRect.anchorMax = new Vector2(0.5f, 0.5f);
         btnRect.pivot = new Vector2(0.5f, 0.5f);
-        btnRect.sizeDelta = new Vector2(400, 90);
+        btnRect.sizeDelta = size;
         btnRect.anchoredPosition = position;
 
-        // Button text
-        GameObject btnTextGO = CreateUIElement("Text", btnGO.transform);
-        Text btnText = btnTextGO.AddComponent<Text>();
-        btnText.text = label;
-        btnText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        btnText.fontSize = 42;
-        btnText.fontStyle = FontStyle.Bold;
-        btnText.alignment = TextAnchor.MiddleCenter;
-        btnText.color = Color.white;
+        // Text label
+        if (!string.IsNullOrEmpty(label))
+        {
+            GameObject btnTextGO = CreateUIElement("Text", btnGO.transform);
+            Text btnText = btnTextGO.AddComponent<Text>();
+            btnText.text = label;
+            btnText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            btnText.fontSize = 30;
+            btnText.fontStyle = FontStyle.Bold;
+            btnText.alignment = TextAnchor.MiddleCenter;
+            btnText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            btnText.verticalOverflow = VerticalWrapMode.Overflow;
+            btnText.color = Color.white;
+            btnText.raycastTarget = false;
 
-        RectTransform btnTextRect = btnTextGO.GetComponent<RectTransform>();
-        StretchToFill(btnTextRect);
+            Shadow shadow = btnTextGO.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+            shadow.effectDistance = new Vector2(1.5f, -1.5f);
+
+            StretchToFill(btnTextGO.GetComponent<RectTransform>());
+        }
 
         btn.onClick.AddListener(onClick);
+    }
+
+    /// <summary>
+    /// Loads a sprite. Uses AssetDatabase in Editor, Resources.Load in builds.
+    /// </summary>
+    private static Sprite LoadSprite(string assetPath)
+    {
+#if UNITY_EDITOR
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+#else
+        // For builds: expects sprite in Resources folder
+        // e.g. "Assets/UI/ButtonsText/ButtonText_Small_Green_Round.png"
+        // -> Resources path: "UI/ButtonsText/ButtonText_Small_Green_Round"
+        string resourcePath = assetPath
+            .Replace("Assets/", "")
+            .Replace(".png", "")
+            .Replace(".jpg", "");
+        return Resources.Load<Sprite>(resourcePath);
+#endif
     }
 
     private static GameObject CreateUIElement(string name, Transform parent)
@@ -173,7 +244,12 @@ public static class EndGameUI
     private static void GoToMainGarden()
     {
         isShowing = false;
-        canvasGO = null;
+        if (canvasGO != null)
+        {
+            Object.Destroy(canvasGO);
+            canvasGO = null;
+        }
+        Time.timeScale = 1f;
         MiniGameLauncher.ReturnToGarden();
     }
 }

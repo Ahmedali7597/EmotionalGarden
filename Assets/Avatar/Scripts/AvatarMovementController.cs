@@ -26,8 +26,9 @@ public class AvatarMovementController : MonoBehaviour
     {
         if (_avatar == null || _avatar.IsWatering) return;
 
-        // Don't process if settings is open
+        // Don't process if settings or end game is open
         if (SettingsUI.isOpen) return;
+        if (EndGameUI.isShowing) return;
 
         var pointer = Pointer.current;
         if (pointer == null || !pointer.press.wasPressedThisFrame) return;

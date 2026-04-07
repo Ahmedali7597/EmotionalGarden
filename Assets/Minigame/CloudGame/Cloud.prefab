@@ -143,5 +143,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Cloud
   floatSpeed: 1
   floatDistance: 0.5
-  swatPower: 8
+  swatPower: 30
   friction: 5

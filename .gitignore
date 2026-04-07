@@ -37,3 +37,6 @@ Packages/Coplay.meta
 # MCP Unity (git package — do not commit)
 Packages/com.gamelovers.mcp-unity/
 Packages/com.gamelovers.mcp-unity.meta
+
+# Unity build temp cache
+.utmp/

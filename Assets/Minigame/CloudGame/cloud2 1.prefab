@@ -107,7 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Cloud
   floatSpeed: 1
   floatDistance: 0.5
-  swatPower: 6
+  swatPower: 15
   friction: 5
 --- !u!70 &3554228771533109929
 CapsuleCollider2D:
