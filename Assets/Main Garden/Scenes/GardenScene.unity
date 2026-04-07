@@ -2102,6 +2102,7 @@ GameObject:
   - component: {fileID: 1352431168}
   - component: {fileID: 1352431174}
   - component: {fileID: 1352431173}
+  - component: {fileID: 1352431175}
   m_Layer: 0
   m_Name: GardenController
   m_TagString: Untagged
@@ -2303,6 +2304,31 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1352431175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352431167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0064ed76a330ef84baab4f2636bb318a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GardenSlimeSpawner
+  slimePrefabs:
+  - {fileID: 5793236650183292443, guid: cf04e6c35ccffcf48a3101fa7555e3cd, type: 3}
+  - {fileID: 3793078824631021740, guid: 0fe01cfdd1daf2640824aadca923b7ac, type: 3}
+  - {fileID: 2500634581261960638, guid: 28b495911f54b4344b0286c524c5a5d9, type: 3}
+  - {fileID: 3337952870456381422, guid: 23fb0da38cfedbe42876ce10e82dff8f, type: 3}
+  - {fileID: 1342735518849688598, guid: 9136cbeda1ce4bd42a74bfa701fe7e7c, type: 3}
+  - {fileID: 5357301918235985313, guid: 685735af81f1aae459592b5c83a3e55e, type: 3}
+  - {fileID: 464220606094743025, guid: a5cde17068573b94fb39853dad07c75d, type: 3}
+  - {fileID: 4707060367138582242, guid: 4ca9f015dc54ea14bbb77df7aeaf885d, type: 3}
+  - {fileID: 3045354380670962193, guid: 3723aec2fcb81d941b6c8e1d8a1ce540, type: 3}
+  spawnCount: 3
+  spawnRadius: 2
+  boundary: {fileID: 1923722289}
 --- !u!1 &1442215658
 GameObject:
   m_ObjectHideFlags: 0
@@ -4835,7 +4861,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -1}
+  m_Offset: {x: 0, y: -0.65}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -4845,7 +4871,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 4.6, y: 6.5}
+  m_Size: {x: 4, y: 5.85}
   m_EdgeRadius: 0
 --- !u!4 &1923722290
 Transform:
